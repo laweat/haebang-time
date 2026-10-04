@@ -43,7 +43,7 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body::before{content:""; position:fixed; inset:0; z-index:-1; pointer-events:none; background:radial-gradient(42rem 30rem at -10% -5%, #D3F2E5 0%, transparent 60%),radial-gradient(38rem 28rem at 110% 8%, #FFF6D2 0%, transparent 62%),radial-gradient(44rem 34rem at 50% 115%, #FFE9EF 0%, transparent 60%)}
-body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased}
+body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased; word-break:keep-all; overflow-wrap:break-word}
 button{font-family:inherit}
 button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--primary); outline-offset:2px}
 
@@ -794,7 +794,7 @@ function status(now,P,day){
   const libTxt=P.liberated?clock(P.libClock):'없음';
   if(!sameDay(now,day)){
     const tmr=sameDay(addDays(now,1),day);
-    return {mode:'off',kicker:holidayOf(now)?'오늘은 공휴일 · '+holidayOf(now):'오늘은 쉬는 날',title:'쉬는 날에도 고정비는 흐르는 중',sub:tmr?'내일은 출근이에요':'내일도 쉬어요'+(holidayOf(addDays(now,1))?' · '+holidayOf(addDays(now,1)):''),info:[['다음 출근',(tmr?'내일':(day.getMonth()+1)+'/'+day.getDate()+' ('+DAYS[day.getDay()]+')')+' '+clock(P.start)],['첫 담당',firstName],[(tmr?'내일':DAYS[day.getDay()]+'요일')+' 해방 예정',P.liberated?clock(P.libClock):'어려워요']],char:'me',face:'sleepy',tint:STAGE.off,meter:null,moneyText:burnTxt,tone:'burn',moneyLabel:burnLbl,money:true};
+    return {mode:'off',kicker:holidayOf(now)?'오늘은 공휴일 · '+holidayOf(now):'오늘은 쉬는 날',title:'쉬는 날에도 고정비는 흐르는 중',sub:tmr?'내일은 출근이에요':'내일도 쉬어요'+(holidayOf(addDays(now,1))?' · '+holidayOf(addDays(now,1)):''),info:[['다음 출근',(tmr?'내일':(day-now)<6*864e5?DAYS[day.getDay()]:(day.getMonth()+1)+'/'+day.getDate())+' '+clock(P.start)],['첫 담당',firstName],[(tmr?'내일':DAYS[day.getDay()]+'요일')+' 해방 예정',P.liberated?clock(P.libClock):'어려워요']],char:'me',face:'sleepy',tint:STAGE.off,meter:null,moneyText:burnTxt,tone:'burn',moneyLabel:burnLbl,money:true};
   }
   const ph=phaseAt(c,P);
   if(ph.phase==='before') return {mode:'before',kicker:'출근 전',title:P.liberated?'오늘은 '+libTxt+'에 해방 예정':'오늘은 해방이 어려운 날',sub:'',info:[['출근',clock(P.start)],['첫 담당',firstName],['오늘 해방 예정',P.liberated?clock(P.libClock):'어려워요']],char:first?first.boss.kind:'me',variant:first?variantIdx(first.boss):0,face:'sleepy',tint:first?BLOCK[first.boss.kind]:BLOCK.me,meter:null,moneyText:burnTxt,tone:'burn',moneyLabel:burnLbl,money:true};
