@@ -1055,13 +1055,12 @@ function showView(v){
 }
 
 /* ---------- first-run setup ---------- */
-const STARTER=['cat','raccoon','pigeon','mole','popcorn'];
 const setup={step:0,first:false,T:null};
 function setupDefaults(){
   const mine=!S.example;
-  const amounts={}; CATALOG.forEach(c=>{const b=mine&&S.bosses.find(x=>x.kind===c.kind); amounts[c.kind]=b?b.amount:c.amount;});
+  const amounts={}; CATALOG.forEach(c=>{const b=mine&&S.bosses.find(x=>x.kind===c.kind); amounts[c.kind]=b?b.amount:0;});
   return {salary:mine?S.salary:0,start:S.start,end:S.end,lunch:S.lunch,lunchStart:S.lunchStart,lunchEnd:S.lunchEnd,days:S.days.slice(),
-    picks:mine?CATALOG.map(c=>c.kind).filter(k=>S.bosses.some(b=>b.kind===k)):STARTER.slice(),amounts};
+    picks:mine?CATALOG.map(c=>c.kind).filter(k=>S.bosses.some(b=>b.kind===k)):[],amounts};
 }
 function openSetup(first){
   setup.first=first; setup.step=first?0:1; setup.T=setupDefaults();
@@ -1115,7 +1114,7 @@ function renderSetup(){
     html='<p class="setup-kicker">4 / 4 · 금액</p><h2 class="setup-title">한 달에 얼마씩 나가요?</h2>'
       +'<p class="setup-desc">대략이어도 괜찮아요.</p>'
       +(kinds.length?'<div class="amt-list">'+kinds.map(c=>'<div class="amt-row" style="--blk-soft:'+mixHex(BLOCK[c.kind],.36)+';--bink:'+BINK[c.kind]+'"><span class="coin">'+charSVG(c.kind,'normal')+'</span><div><div class="name">'+esc(c.name)+'님</div><div class="calc">'+esc(c.label)+'</div></div>'
-        +'<span class="money-in"><input class="su-amt" data-kind="'+c.kind+'" inputmode="numeric" value="'+fmt(T.amounts[c.kind])+'" aria-label="'+esc(c.label)+' 월 금액"><em>원</em></span></div>').join('')+'</div>'
+        +'<span class="money-in"><input class="su-amt" data-kind="'+c.kind+'" inputmode="numeric" placeholder="0" value="'+(T.amounts[c.kind]?fmt(T.amounts[c.kind]):'')+'" aria-label="'+esc(c.label)+' 월 금액"><em>원</em></span></div>').join('')+'</div>'
         :'<p class="setup-desc">고른 고정비가 없어요. 이대로면 출근하자마자 해방이에요!</p>');
     next='완료';
   } else {
@@ -1135,12 +1134,22 @@ function setupValid(){
     if(!T.days.length) return '근무 요일을 하나 이상 골라 주세요.';
     if(T.lunch&&!(hm(T.lunchEnd)>hm(T.lunchStart))) return '점심이 끝나는 시각을 확인해 주세요.';
   }
+  if(setup.step===4){
+    const empty=CATALOG.filter(c=>T.picks.includes(c.kind)&&!(T.amounts[c.kind]>0)).map(c=>c.label);
+    if(empty.length) return empty.join(', ')+' 금액을 넣어 주세요. 안 쓰는 항목이면 이전으로 가서 빼 주세요.';
+  }
   return '';
 }
 function applySetup(){
   const T=setup.T;
   S.salary=T.salary; S.start=T.start; S.end=T.end; S.lunch=T.lunch; S.lunchStart=T.lunchStart; S.lunchEnd=T.lunchEnd; S.days=T.days.slice();
-  S.bosses=CATALOG.filter(c=>T.picks.includes(c.kind)).map((c,i)=>({id:'b'+Date.now().toString(36)+i,kind:c.kind,label:c.label,amount:T.amounts[c.kind]||0,on:true}));
+  const old=S.example?[]:S.bosses, out=[];
+  CATALOG.filter(c=>T.picks.includes(c.kind)).forEach((c,i)=>{
+    const mine=old.filter(b=>b.kind===c.kind);
+    if(mine.length){mine[0].amount=T.amounts[c.kind]||0; out.push(...mine);}
+    else out.push({id:'b'+Date.now().toString(36)+i+Math.random().toString(36).slice(2,6),kind:c.kind,label:c.label,amount:T.amounts[c.kind]||0,on:true});
+  });
+  S.bosses=out;
   S.example=false; S.onboarded=true;
   save(); version++; fillSettings(); renderBossList(); tick();
 }
@@ -1171,7 +1180,7 @@ sc.addEventListener('input',e=>{
 sc.addEventListener('focusout',e=>{
   const t=e.target;
   if(t.id==='su-salary') t.value=setup.T.salary?fmt(setup.T.salary):'';
-  if(t.classList.contains('su-amt')) t.value=fmt(setup.T.amounts[t.dataset.kind]||0);
+  if(t.classList.contains('su-amt')) t.value=setup.T.amounts[t.dataset.kind]?fmt(setup.T.amounts[t.dataset.kind]):'';
 });
 sc.addEventListener('change',e=>{
   if(e.target.id!=='su-lunch') return;
