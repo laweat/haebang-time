@@ -270,12 +270,13 @@ img.char-svg{object-fit:contain; -webkit-user-drag:none; user-select:none}
 .boss.is-fired .name,.boss.is-fired .label-input{opacity:.55; text-decoration:line-through}
 
 /* settings */
-.form{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+.form{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px}
 .field{display:grid; gap:6px; font-family:var(--display); font-size:14.5px; color:var(--ink-2); min-width:0}
 .field.wide{grid-column:1/-1}
 .field .money-in{width:100%}
 .field .money-in input{width:100%; font-size:19px; text-align:left}
-.time-in{font:800 15px var(--num); padding:9px 12px; border-radius:var(--r-sm); border:1px solid var(--line); background:var(--surface-2); color:var(--heading); width:100%; min-width:0}
+.time-in{-webkit-appearance:none; appearance:none; display:block; box-sizing:border-box; font:800 15px var(--num); padding:9px 12px; min-height:44px; border-radius:var(--r-sm); border:1px solid var(--line); background:var(--surface-2); color:var(--heading); width:100%; min-width:0; max-width:100%; text-align:center}
+.time-in::-webkit-date-and-time-value{text-align:center; margin:0; min-width:0}
 .field-head{display:flex; justify-content:space-between; align-items:center; gap:8px}
 .lunch-times{display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); gap:8px; align-items:center; color:var(--ink-2)}
 .lunch-times .time-in:disabled{opacity:.45}
